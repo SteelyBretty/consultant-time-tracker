@@ -44,4 +44,4 @@ bruno-collections/**/settings.json
 bruno-collections/**/.env
 
 # Docker
-docker-compose.override.yml
+docker-compose.override.ymltmp/

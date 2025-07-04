@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: consultant-tracker-dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - ..:/app
+      - /app/tmp
+    environment:
+      - APP_ENV=development
+      - APP_PORT=8080
+      - APP_HOST=0.0.0.0
+      - DB_PATH=/app/data/timetracker.db
+      - GRAPHQL_PLAYGROUND=true
+    networks:
+      - tracker-network
+
+networks:
+  tracker-network:
+    driver: bridge
