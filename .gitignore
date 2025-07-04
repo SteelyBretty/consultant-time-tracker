@@ -1,0 +1,47 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test binary
+*.test
+
+# Output of go coverage
+*.out
+
+# Go workspace
+go.work
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.db-journal
+data/*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Bruno
+bruno-collections/**/settings.json
+bruno-collections/**/.env
+
+# Docker
+docker-compose.override.yml
