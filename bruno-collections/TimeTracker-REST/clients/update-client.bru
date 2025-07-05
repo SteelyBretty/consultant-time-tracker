@@ -1,0 +1,42 @@
+meta {
+  name: Update Client
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/clients/:id
+  body: json
+  auth: basic
+}
+
+params:path {
+  id: {{clientId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "name": "Acme Corp Updated",
+    "phone": "+1-555-5678"
+  }
+}
+
+vars:pre-request {
+  clientId: // This will be set manually
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Should return updated data", function() {
+    expect(res.body.name).to.equal("Acme Corp Updated");
+    expect(res.body.phone).to.equal("+1-555-5678");
+  });
+}

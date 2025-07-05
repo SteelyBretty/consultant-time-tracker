@@ -1,0 +1,26 @@
+meta {
+  name: Create Client (TechCorp)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/clients
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "name": "TechCorp Solutions",
+    "code": "TECH",
+    "email": "info@techcorp.com",
+    "phone": "+1-555-9999",
+    "address": "456 Tech Blvd, San Francisco, CA 94105"
+  }
+}

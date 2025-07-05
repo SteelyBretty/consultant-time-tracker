@@ -1,0 +1,29 @@
+meta {
+  name: List Clients
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/clients?limit=10&offset=0
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Should return client list", function() {
+    expect(res.body.clients).to.be.an('array');
+    expect(res.body.total).to.be.a('number');
+    expect(res.body.limit).to.equal(10);
+    expect(res.body.offset).to.equal(0);
+  });
+}

@@ -1,0 +1,31 @@
+meta {
+  name: Search Clients
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/clients?search=acme&is_active=true
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Should return filtered results", function() {
+    expect(res.body.clients).to.be.an('array');
+    if (res.body.clients.length > 0) {
+      res.body.clients.forEach(client => {
+        expect(client.is_active).to.be.true;
+      });
+    }
+  });
+}

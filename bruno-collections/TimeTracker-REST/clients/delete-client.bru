@@ -1,0 +1,30 @@
+meta {
+  name: Delete Client
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/clients/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: {{clientId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  clientId: // This will be set manually
+}
+
+tests {
+  test("Status should be 204", function() {
+    expect(res.status).to.equal(204);
+  });
+}

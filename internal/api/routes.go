@@ -8,6 +8,7 @@ import (
 
 func SetupRoutes(router *gin.Engine) {
 	authHandler := handlers.NewAuthHandler()
+	clientHandler := handlers.NewClientHandler()
 
 	api := router.Group("/api/v1")
 	{
@@ -16,6 +17,19 @@ func SetupRoutes(router *gin.Engine) {
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
 			auth.GET("/me", middleware.BasicAuth(), authHandler.GetCurrentUser)
+		}
+
+		protected := api.Group("/")
+		protected.Use(middleware.BasicAuth())
+		{
+			clients := protected.Group("/clients")
+			{
+				clients.POST("", clientHandler.CreateClient)
+				clients.GET("", clientHandler.ListClients)
+				clients.GET("/:id", clientHandler.GetClient)
+				clients.PUT("/:id", clientHandler.UpdateClient)
+				clients.DELETE("/:id", clientHandler.DeleteClient)
+			}
 		}
 	}
 }
