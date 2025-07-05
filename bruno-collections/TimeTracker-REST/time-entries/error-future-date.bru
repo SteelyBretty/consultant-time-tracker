@@ -1,0 +1,46 @@
+meta {
+  name: Error - Future Date
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/v1/time-entries
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "project_id": "{{projectId}}",
+    "date": "{{futureDate}}",
+    "hours": 8,
+    "description": "This should fail",
+    "is_billable": true
+  }
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  futureDate: tomorrow.toISOString().split('T')[0]
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Should return 400 for future date", () => {
+    expect(status).to.equal(400);
+  });
+  
+  test("Error should mention future dates", () => {
+    expect(body.error).to.include("future");
+  });
+}

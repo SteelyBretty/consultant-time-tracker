@@ -1,0 +1,52 @@
+meta {
+  name: Create Time Entry
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/time-entries
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "project_id": "{{projectId}}",
+    "date": "{{today}}",
+    "hours": 8,
+    "description": "Implemented user authentication module",
+    "is_billable": true
+  }
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+  today: new Date().toISOString().split('T')[0]
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 201", () => {
+    expect(status).to.equal(201);
+  });
+  
+  test("Should return time entry data", () => {
+    expect(body).to.have.property('id');
+    expect(body.hours).to.equal(8);
+    expect(body.is_billable).to.be.true;
+  });
+  
+  test("Should include project details", () => {
+    expect(body.project).to.exist;
+    expect(body.project).to.have.property('name');
+    expect(body.project.client).to.have.property('name');
+  });
+}

@@ -1,0 +1,43 @@
+meta {
+  name: Filter by Project and Date Range
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/time-entries?project_id={{projectId}}&start_date={{startDate}}&end_date={{endDate}}&is_billable=true
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+  startDate: "2024-12-01"
+  endDate: "2024-12-31"
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("All entries should match filters", () => {
+    const projectId = req.url.match(/project_id=([^&]+)/)[1];
+    body.time_entries.forEach(entry => {
+      expect(entry.project_id).to.equal(projectId);
+      expect(entry.is_billable).to.be.true;
+      
+      const entryDate = new Date(entry.date);
+      expect(entryDate >= new Date("2024-12-01")).to.be.true;
+      expect(entryDate <= new Date("2024-12-31")).to.be.true;
+    });
+  });
+}

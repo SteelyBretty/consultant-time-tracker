@@ -1,0 +1,49 @@
+meta {
+  name: Get Project Week Comparison
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/v1/time-entries/projects/:projectId/week-comparison?week={{weekDate}}
+  body: none
+  auth: basic
+}
+
+params:path {
+  projectId: {{projectId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+  weekDate: "2024-12-16"
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return comparison data", () => {
+    expect(body).to.have.all.keys(
+      'project_id', 'week_starting', 'allocated_hours', 
+      'actual_hours', 'variance', 'variance_percent'
+    );
+  });
+  
+  test("Variance calculations should be correct", () => {
+    expect(body.variance).to.equal(body.actual_hours - body.allocated_hours);
+    if (body.allocated_hours > 0) {
+      const expectedPercent = (body.variance / body.allocated_hours) * 100;
+      expect(body.variance_percent).to.be.closeTo(expectedPercent, 0.01);
+    }
+  });
+}

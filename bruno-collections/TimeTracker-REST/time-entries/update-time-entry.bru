@@ -1,0 +1,46 @@
+meta {
+  name: Update Time Entry
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/v1/time-entries/:id
+  body: json
+  auth: basic
+}
+
+params:path {
+  id: {{timeEntryId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "hours": 7.5,
+    "description": "Implemented auth module and fixed bugs",
+    "is_billable": true
+  }
+}
+
+vars:pre-request {
+  timeEntryId: // Set to valid time entry ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should update time entry", () => {
+    expect(body.hours).to.equal(7.5);
+    expect(body.description).to.include("fixed bugs");
+  });
+}

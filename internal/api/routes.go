@@ -11,7 +11,7 @@ func SetupRoutes(router *gin.Engine) {
 	clientHandler := handlers.NewClientHandler()
 	projectHandler := handlers.NewProjectHandler()
 	allocationHandler := handlers.NewAllocationHandler()
-
+	timeEntryHandler := handlers.NewTimeEntryHandler()
 	api := router.Group("/api/v1")
 	{
 		auth := api.Group("/auth")
@@ -51,6 +51,19 @@ func SetupRoutes(router *gin.Engine) {
 				allocations.PUT("/:id", allocationHandler.UpdateAllocation)
 				allocations.DELETE("/:id", allocationHandler.DeleteAllocation)
 				allocations.POST("/copy", allocationHandler.CopyWeekAllocations)
+			}
+
+			timeEntries := protected.Group("/time-entries")
+			{
+				timeEntries.POST("", timeEntryHandler.CreateTimeEntry)
+				timeEntries.GET("", timeEntryHandler.ListTimeEntries)
+				timeEntries.GET("/day", timeEntryHandler.GetDayEntries)
+				timeEntries.GET("/week", timeEntryHandler.GetWeekEntries)
+				timeEntries.GET("/week-summary", timeEntryHandler.GetWeekSummary)
+				timeEntries.GET("/projects/:projectId/week-comparison", timeEntryHandler.GetProjectWeekComparison)
+				timeEntries.GET("/:id", timeEntryHandler.GetTimeEntry)
+				timeEntries.PUT("/:id", timeEntryHandler.UpdateTimeEntry)
+				timeEntries.DELETE("/:id", timeEntryHandler.DeleteTimeEntry)
 			}
 		}
 	}
