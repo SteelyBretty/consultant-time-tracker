@@ -1,0 +1,36 @@
+meta {
+  name: Get Client
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/clients/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: {{clientId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  clientId: // This will be set manually after creating a client
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Should return client details", function() {
+    expect(res.body.id).to.exist;
+    expect(res.body.name).to.exist;
+    expect(res.body.code).to.exist;
+  });
+}

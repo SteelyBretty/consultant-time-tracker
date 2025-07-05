@@ -1,0 +1,39 @@
+meta {
+  name: Create Client
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/clients
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "name": "Acme Corporation",
+    "code": "ACME",
+    "email": "contact@acme.com",
+    "phone": "+1-555-1234",
+    "address": "123 Business St, Suite 100, New York, NY 10001"
+  }
+}
+
+tests {
+  test("Status should be 201", function() {
+    expect(res.status).to.equal(201);
+  });
+  
+  test("Should return client data", function() {
+    expect(res.body.id).to.exist;
+    expect(res.body.name).to.equal("Acme Corporation");
+    expect(res.body.code).to.equal("ACME");
+    expect(res.body.is_active).to.be.true;
+  });
+}
