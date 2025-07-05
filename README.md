@@ -11,6 +11,7 @@ A comprehensive time tracking and billing system for consultants with REST and G
 - REST and GraphQL APIs
 - SQLite database with automatic migrations
 - Docker support for development and production
+- Basic authentication system
 
 ## Tech Stack
 
@@ -105,22 +106,34 @@ If you prefer running locally without Docker:
 ### Base URL
 - Local: `http://localhost:8080`
 
+### Authentication
+All API endpoints (except health, info, register, and login) require Basic Authentication.
+Include the Authorization header: `Basic base64(username:password)`
+
 ### Available Endpoints
 
 #### System
 - `GET /health` - Health check with database status
 - `GET /` - API information
 
-#### Authentication (Coming in Milestone 4)
+#### Authentication
 - `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login
+- `POST /api/v1/auth/login` - Login user (verify credentials)
+- `GET /api/v1/auth/me` - Get current user info (requires auth)
 
-#### Clients (Coming in Milestone 5)
-- `GET /api/v1/clients` - List all clients
+#### Clients
 - `POST /api/v1/clients` - Create new client
+- `GET /api/v1/clients` - List all clients (paginated)
 - `GET /api/v1/clients/:id` - Get client details
 - `PUT /api/v1/clients/:id` - Update client
-- `DELETE /api/v1/clients/:id` - Delete client
+- `DELETE /api/v1/clients/:id` - Delete client (soft delete)
+
+#### Projects (Coming in Milestone 6)
+- `POST /api/v1/projects` - Create new project
+- `GET /api/v1/projects` - List all projects
+- `GET /api/v1/projects/:id` - Get project details
+- `PUT /api/v1/projects/:id` - Update project
+- `DELETE /api/v1/projects/:id` - Delete project
 
 ## Testing with Bruno
 
@@ -145,115 +158,164 @@ If you prefer running locally without Docker:
    make docker-dev
    ```
 
-2. In Bruno:
-   - Navigate to the request you want to test
-   - Click "Send" to execute the request
-   - Check the "Tests" tab to see automated test results
-   - All tests should show green checkmarks when passing
+2. Follow this test flow:
+   - **Register** a new user (or use existing)
+   - **Login** to verify credentials
+   - **Create Client** to add test data
+   - **List Clients** to see all clients
+   - **Update/Delete** as needed
 
-### Available Test Collections
+3. Each request includes automated tests that verify the response
 
-Currently implemented:
-- **System**
-  - Health Check - Verifies server and database health
-  - API Info - Returns available endpoints
+### API Testing Workflow
 
-Coming soon:
-- **Auth** - User registration and login
-- **Clients** - Client CRUD operations
-- **Projects** - Project management
-- **Allocations** - Weekly hour planning
-- **Time Entries** - Daily time tracking
-- **Reports** - Analytics and summaries
+#### 1. First Time Setup
+```
+1. Register User → 2. Login (verify) → 3. Create Clients
+```
 
-### Understanding Test Results
+#### 2. Client Management Flow
+```
+1. Create Client → 2. List Clients → 3. Get Client → 4. Update Client → 5. Delete Client
+```
 
-Each Bruno request includes automated tests that verify:
-- HTTP status codes
-- Response structure
-- Required fields
-- Data validity
+### Test Data
 
-Failed tests will show in red with details about what went wrong.
+The Bruno collection includes sample data for:
+- **Users**: johndoe/password123, janedoe/password456
+- **Clients**: Acme Corporation (ACME), TechCorp Solutions (TECH)
 
-## Database
+## API Documentation
 
-The application uses SQLite for data persistence with automatic migrations on startup.
+### Authentication Endpoints
 
-### Database Location
-- Development: `./data/timetracker.db`
-- Docker: Mounted at `/app/data/timetracker.db`
+#### Register User
+```
+POST /api/v1/auth/register
+Content-Type: application/json
 
-### Schema
+{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "password123",
+  "full_name": "John Doe"
+}
+```
 
-The database includes the following tables:
+#### Login
+```
+POST /api/v1/auth/login
+Content-Type: application/json
 
-#### users
+{
+  "username": "johndoe",
+  "password": "password123"
+}
+```
+
+### Client Endpoints
+
+#### Create Client
+```
+POST /api/v1/clients
+Authorization: Basic base64(username:password)
+Content-Type: application/json
+
+{
+  "name": "Acme Corporation",
+  "code": "ACME",
+  "email": "contact@acme.com",
+  "phone": "+1-555-1234",
+  "address": "123 Business St, New York, NY"
+}
+```
+
+#### List Clients
+```
+GET /api/v1/clients?limit=20&offset=0&search=acme&is_active=true
+Authorization: Basic base64(username:password)
+```
+
+Query Parameters:
+- `limit` - Number of results (max 100, default 20)
+- `offset` - Skip N results for pagination
+- `search` - Search in name, code, or email
+- `is_active` - Filter by active status (true/false)
+
+#### Get Client
+```
+GET /api/v1/clients/{id}
+Authorization: Basic base64(username:password)
+```
+
+#### Update Client
+```
+PUT /api/v1/clients/{id}
+Authorization: Basic base64(username:password)
+Content-Type: application/json
+
+{
+  "name": "Updated Name",
+  "is_active": false
+}
+```
+
+#### Delete Client
+```
+DELETE /api/v1/clients/{id}
+Authorization: Basic base64(username:password)
+```
+
+## Database Schema
+
+### users
 - `id` (UUID) - Primary key
-- `username` (string) - Unique username for login
-- `password` (string) - Bcrypt hashed password
-- `email` (string) - Unique email address
-- `full_name` (string) - User's full name
+- `username` (string) - Unique, for login
+- `password` (string) - Bcrypt hashed
+- `email` (string) - Unique
+- `full_name` (string) - Display name
 - `is_active` (boolean) - Account status
 - `created_at`, `updated_at`, `deleted_at` - Timestamps
 
-#### clients
+### clients
 - `id` (UUID) - Primary key
-- `name` (string) - Client company name
-- `code` (string) - Unique client code
+- `name` (string) - Company name
+- `code` (string) - Unique per user, uppercase
 - `email` (string) - Contact email
 - `phone` (string) - Contact phone
-- `address` (string) - Client address
+- `address` (string) - Full address
 - `is_active` (boolean) - Client status
-- `user_id` (UUID) - Owner user reference
+- `user_id` (UUID) - Owner reference
+- `created_at`, `updated_at`, `deleted_at` - Timestamps
 
-#### projects
+### projects (Coming Soon)
 - `id` (UUID) - Primary key
 - `name` (string) - Project name
 - `code` (string) - Unique project code
-- `description` (string) - Project details
-- `status` (enum) - active, on_hold, completed, cancelled
-- `billable_rate` (float) - Hourly rate
-- `currency` (string) - Currency code (default: USD)
-- `start_date` (date) - Project start
-- `end_date` (date) - Project end (nullable)
 - `client_id` (UUID) - Client reference
-- `user_id` (UUID) - Owner user reference
+- `billable_rate` (float) - Hourly rate
+- `status` (enum) - active/on_hold/completed/cancelled
 
-#### allocations
-- `id` (UUID) - Primary key
-- `project_id` (UUID) - Project reference
-- `user_id` (UUID) - User reference
-- `week_starting` (date) - Monday of the week
-- `hours` (float) - Allocated hours for the week
-- `notes` (string) - Additional notes
+## Error Handling
 
-#### time_entries
-- `id` (UUID) - Primary key
-- `project_id` (UUID) - Project reference
-- `user_id` (UUID) - User reference
-- `date` (date) - Entry date
-- `hours` (float) - Hours worked
-- `description` (string) - Work description
-- `is_billable` (boolean) - Billable flag
+The API returns consistent error responses:
 
-### Viewing the Database
-
-To inspect the database directly:
-
-```bash
-# Install SQLite if needed
-brew install sqlite
-
-# View all tables
-sqlite3 data/timetracker.db ".tables"
-
-# View schema
-sqlite3 data/timetracker.db ".schema"
-
-# Query data (example)
-sqlite3 data/timetracker.db "SELECT * FROM users;"
+```json
+{
+  "error": "Error message here",
+  "details": "Additional context (optional)"
+}
 ```
+
+Common HTTP status codes:
+- `200` - Success
+- `201` - Created
+- `204` - No Content (successful delete)
+- `400` - Bad Request (validation error)
+- `401` - Unauthorized (missing/invalid auth)
+- `404` - Not Found
+- `409` - Conflict (duplicate code/username)
+- `500` - Internal Server Error
 
 ## Project Structure
 
@@ -261,102 +323,100 @@ sqlite3 data/timetracker.db "SELECT * FROM users;"
 consultant-time-tracker/
 ├── cmd/
 │   └── server/         # Application entrypoint
-│       └── main.go
 ├── internal/           # Private application code
-│   ├── models/         # Database models
-│   │   ├── base.go    # Base model with UUID
-│   │   ├── user.go    # User model
-│   │   ├── client.go  # Client model
-│   │   ├── project.go # Project model
-│   │   ├── allocation.go # Allocation model
-│   │   └── time_entry.go # Time entry model
-│   ├── database/       # Database configuration
-│   │   ├── connection.go # Database connection
-│   │   └── migrations.go # Migration logic
-│   ├── handlers/       # HTTP handlers (Coming soon)
-│   ├── middleware/     # HTTP middleware (Coming soon)
-│   ├── graphql/        # GraphQL schema (Coming soon)
-│   └── services/       # Business logic (Coming soon)
-├── docker/             # Docker configurations
-│   ├── Dockerfile      # Production image
-│   ├── Dockerfile.dev  # Development image
-│   └── docker-compose.yml
-├── bruno-collections/  # API test collections
+│   ├── api/           # Route definitions
+│   ├── database/      # Database configuration
+│   ├── handlers/      # HTTP request handlers
+│   │   ├── auth.go   # Authentication endpoints
+│   │   └── clients.go # Client CRUD endpoints
+│   ├── middleware/    # HTTP middleware
+│   │   └── auth.go   # Basic Auth middleware
+│   ├── models/        # Database models
+│   ├── schemas/       # Request/Response schemas
+│   └── services/      # Business logic
+│       ├── auth_service.go    # Auth logic
+│       └── client_service.go  # Client logic
+├── docker/            # Docker configurations
+├── bruno-collections/ # API test collections
 │   └── TimeTracker-REST/
-│       ├── environments/
-│       ├── system/
-│       └── bruno.json
-├── data/              # Database storage (git-ignored)
-├── configs/           # Configuration files
-├── scripts/           # Utility scripts
-├── go.mod            # Go module definition
-├── go.sum            # Go module checksums
-├── .env.example      # Environment template
-├── .gitignore        # Git ignore rules
-├── Makefile          # Build commands
+│       ├── auth/     # Auth test requests
+│       ├── clients/  # Client test requests
+│       └── system/   # Health checks
+├── data/             # SQLite database file
 └── README.md         # This file
-```
-
-## Environment Variables
-
-Create a `.env` file from `.env.example`:
-
-```bash
-APP_ENV=development
-APP_PORT=8080
-APP_HOST=0.0.0.0
-DB_PATH=./data/timetracker.db
-GRAPHQL_PLAYGROUND=true
 ```
 
 ## Development Workflow
 
-1. Create a feature branch:
+### Adding New Features
+
+1. Create feature branch:
    ```bash
-   git checkout -b feature/your-feature-name
+   git checkout -b feature/your-feature
    ```
 
-2. Make your changes and test:
-   ```bash
-   make docker-dev
-   # Make changes, test with Bruno
-   ```
+2. Implement feature with TDD approach:
+   - Write Bruno tests first
+   - Implement the feature
+   - Ensure all tests pass
 
-3. Commit and push:
-   ```bash
-   git add .
-   git commit -m "Description of changes"
-   git push -u origin feature/your-feature-name
-   ```
+3. Submit PR with:
+   - Clear description
+   - Test instructions
+   - Bruno collection updates
 
-4. Create a Pull Request on GitHub
+### Code Organization
+
+- **Models**: Database entities in `internal/models/`
+- **Services**: Business logic in `internal/services/`
+- **Handlers**: HTTP handlers in `internal/handlers/`
+- **Schemas**: Request/Response types in `internal/schemas/`
+- **Middleware**: Auth, CORS, etc. in `internal/middleware/`
 
 ## Troubleshooting
 
-### Port Already in Use
-If port 8080 is already in use:
+### Cannot Connect to Server
 ```bash
-# Find process using port 8080
-lsof -i :8080
-# Kill the process or change APP_PORT in .env
-```
+# Check if server is running
+docker ps
 
-### Database Issues
-If you encounter database errors:
-```bash
-# Stop containers
+# View logs
+make docker-logs
+
+# Restart server
 make docker-down
-# Remove database
-rm -f data/timetracker.db*
-# Restart
 make docker-dev
 ```
 
-### Docker Issues
-If Docker containers won't start:
+### Authentication Issues
+- Ensure you're using Basic Auth format
+- Username and password are case-sensitive
+- Check user is active in database
+
+### Database Issues
 ```bash
-# Clean up containers
-docker system prune
-# Rebuild without cache
-docker-compose -f docker/docker-compose.yml build --no-cache
+# Reset database
+rm -f data/timetracker.db*
+make docker-dev
 ```
+
+### Port Conflicts
+```bash
+# Check what's using port 8080
+lsof -i :8080
+
+# Change port in .env file
+APP_PORT=8081
+```
+
+## Next Steps
+
+- **Milestone 6**: Project Management
+- **Milestone 7**: Time Allocations
+- **Milestone 8**: Time Entry Tracking
+- **Milestone 9**: GraphQL API
+- **Milestone 10**: Reporting & Analytics
+
+## License
+
+[Your License Here]
