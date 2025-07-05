@@ -9,6 +9,7 @@ import (
 func SetupRoutes(router *gin.Engine) {
 	authHandler := handlers.NewAuthHandler()
 	clientHandler := handlers.NewClientHandler()
+	projectHandler := handlers.NewProjectHandler()
 
 	api := router.Group("/api/v1")
 	{
@@ -29,6 +30,15 @@ func SetupRoutes(router *gin.Engine) {
 				clients.GET("/:id", clientHandler.GetClient)
 				clients.PUT("/:id", clientHandler.UpdateClient)
 				clients.DELETE("/:id", clientHandler.DeleteClient)
+			}
+
+			projects := protected.Group("/projects")
+			{
+				projects.POST("", projectHandler.CreateProject)
+				projects.GET("", projectHandler.ListProjects)
+				projects.GET("/:id", projectHandler.GetProject)
+				projects.PUT("/:id", projectHandler.UpdateProject)
+				projects.DELETE("/:id", projectHandler.DeleteProject)
 			}
 		}
 	}

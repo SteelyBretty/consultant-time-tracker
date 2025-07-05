@@ -1,0 +1,41 @@
+meta {
+  name: List Projects
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/projects?limit=10&offset=0
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return project list structure", () => {
+    expect(body).to.have.all.keys('projects', 'total', 'offset', 'limit');
+    expect(body.projects).to.be.an('array');
+    expect(body.limit).to.equal(10);
+    expect(body.offset).to.equal(0);
+  });
+  
+  test("Projects should have required fields", () => {
+    if (body.projects.length > 0) {
+      const project = body.projects[0];
+      expect(project).to.include.all.keys(
+        'id', 'name', 'code', 'status', 'billable_rate', 'currency'
+      );
+    }
+  });
+}

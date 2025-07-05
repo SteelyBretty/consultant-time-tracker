@@ -1,0 +1,37 @@
+meta {
+  name: Filter Projects by Client
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/projects?client_id={{clientId}}&status=active
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  clientId: // Set this to a valid client ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("All projects should belong to specified client", () => {
+    const clientId = req.url.match(/client_id=([^&]+)/)[1];
+    body.projects.forEach(project => {
+      expect(project.client_id).to.equal(clientId);
+      expect(project.status).to.equal("active");
+    });
+  });
+}

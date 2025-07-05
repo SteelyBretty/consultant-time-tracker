@@ -1,0 +1,39 @@
+meta {
+  name: Get Project
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/projects/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: {{projectId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  projectId: // Set this to a valid project ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return complete project details", () => {
+    expect(body).to.have.property('id');
+    expect(body).to.have.property('client');
+    expect(body.client).to.be.an('object');
+  });
+}

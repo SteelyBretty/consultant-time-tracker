@@ -1,0 +1,45 @@
+meta {
+  name: Update Project Status
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/projects/:id
+  body: json
+  auth: basic
+}
+
+params:path {
+  id: {{projectId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "status": "on_hold",
+    "description": "Project temporarily on hold due to budget review"
+  }
+}
+
+vars:pre-request {
+  projectId: // Set this to a valid project ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should update project status", () => {
+    expect(body.status).to.equal("on_hold");
+    expect(body.description).to.include("budget review");
+  });
+}
