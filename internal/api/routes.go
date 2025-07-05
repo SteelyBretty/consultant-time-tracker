@@ -10,6 +10,7 @@ func SetupRoutes(router *gin.Engine) {
 	authHandler := handlers.NewAuthHandler()
 	clientHandler := handlers.NewClientHandler()
 	projectHandler := handlers.NewProjectHandler()
+	allocationHandler := handlers.NewAllocationHandler()
 
 	api := router.Group("/api/v1")
 	{
@@ -39,6 +40,17 @@ func SetupRoutes(router *gin.Engine) {
 				projects.GET("/:id", projectHandler.GetProject)
 				projects.PUT("/:id", projectHandler.UpdateProject)
 				projects.DELETE("/:id", projectHandler.DeleteProject)
+			}
+
+			allocations := protected.Group("/allocations")
+			{
+				allocations.POST("", allocationHandler.CreateAllocation)
+				allocations.GET("", allocationHandler.ListAllocations)
+				allocations.GET("/week", allocationHandler.GetWeekAllocations)
+				allocations.GET("/:id", allocationHandler.GetAllocation)
+				allocations.PUT("/:id", allocationHandler.UpdateAllocation)
+				allocations.DELETE("/:id", allocationHandler.DeleteAllocation)
+				allocations.POST("/copy", allocationHandler.CopyWeekAllocations)
 			}
 		}
 	}

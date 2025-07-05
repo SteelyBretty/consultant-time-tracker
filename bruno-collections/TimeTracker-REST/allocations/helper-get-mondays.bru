@@ -1,0 +1,38 @@
+meta {
+  name: Helper - Get Monday Dates
+  type: http
+  seq: 0
+}
+
+get {
+  url: {{baseUrl}}/health
+  body: none
+  auth: none
+}
+
+tests {
+  const { expect } = require('chai');
+  
+  test("Calculate Monday dates for testing", () => {
+    const getMonday = (date) => {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      return d.toISOString().split('T')[0];
+    };
+    
+    const today = new Date();
+    const thisMonday = getMonday(today);
+    const nextMonday = getMonday(new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000));
+    const lastMonday = getMonday(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000));
+    
+    console.log('Monday Dates for Testing:');
+    console.log('Last Monday:', lastMonday);
+    console.log('This Monday:', thisMonday);
+    console.log('Next Monday:', nextMonday);
+    
+    // Always pass
+    expect(true).to.be.true;
+  });
+}

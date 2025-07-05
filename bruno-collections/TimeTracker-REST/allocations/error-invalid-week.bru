@@ -1,0 +1,42 @@
+meta {
+  name: Error - Invalid Week Start
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/allocations
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "project_id": "{{projectId}}",
+    "week_starting": "2024-12-17", // Tuesday, not Monday
+    "hours": 10,
+    "notes": "This should fail"
+  }
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Should return 400 for non-Monday date", () => {
+    expect(status).to.equal(400);
+  });
+  
+  test("Error should mention Monday requirement", () => {
+    expect(body.error).to.include("Monday");
+  });
+}

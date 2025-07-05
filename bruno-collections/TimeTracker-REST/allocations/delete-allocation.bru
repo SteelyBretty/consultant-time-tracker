@@ -1,0 +1,33 @@
+meta {
+  name: Delete Allocation
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/allocations/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: {{allocationId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  allocationId: // Set to valid allocation ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status } = res;
+  
+  test("Status should be 204", () => {
+    expect(status).to.equal(204);
+  });
+}

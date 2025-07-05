@@ -1,0 +1,44 @@
+meta {
+  name: Copy Week Allocations
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/allocations/copy
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "from_week": "2024-12-16",
+    "to_week": "2024-12-23"
+  }
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return copied allocations", () => {
+    expect(body).to.have.property('copied_count');
+    expect(body.allocations).to.be.an('array');
+    expect(body.copied_count).to.equal(body.allocations.length);
+  });
+  
+  test("Copied allocations should be for target week", () => {
+    body.allocations.forEach(allocation => {
+      expect(allocation.week_starting).to.equal("2024-12-23");
+    });
+  });
+}

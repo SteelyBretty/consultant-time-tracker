@@ -1,0 +1,38 @@
+meta {
+  name: List Allocations
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/allocations?limit=20&offset=0
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return allocation list", () => {
+    expect(body).to.have.all.keys('allocations', 'total', 'offset', 'limit');
+    expect(body.allocations).to.be.an('array');
+  });
+  
+  test("Each allocation should have project info", () => {
+    if (body.allocations.length > 0) {
+      const allocation = body.allocations[0];
+      expect(allocation.project).to.exist;
+      expect(allocation.project.client).to.exist;
+    }
+  });
+}
