@@ -1,0 +1,51 @@
+meta {
+  name: Create Allocation
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/allocations
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "project_id": "{{projectId}}",
+    "week_starting": "{{mondayDate}}",
+    "hours": 20,
+    "notes": "Frontend development and design reviews"
+  }
+}
+
+vars:pre-request {
+  projectId: // Set to valid project ID
+  mondayDate: "2024-12-16" // Must be a Monday
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 201", () => {
+    expect(status).to.equal(201);
+  });
+  
+  test("Should return allocation data", () => {
+    expect(body).to.have.property('id');
+    expect(body.hours).to.equal(20);
+    expect(body.week_starting).to.equal("2024-12-16");
+  });
+  
+  test("Should include project details", () => {
+    expect(body.project).to.exist;
+    expect(body.project).to.have.property('name');
+    expect(body.project.client).to.have.property('name');
+  });
+}

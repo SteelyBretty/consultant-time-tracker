@@ -1,0 +1,45 @@
+meta {
+  name: Update Allocation
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/allocations/:id
+  body: json
+  auth: basic
+}
+
+params:path {
+  id: {{allocationId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "hours": 25,
+    "notes": "Increased hours for additional feature work"
+  }
+}
+
+vars:pre-request {
+  allocationId: // Set to valid allocation ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should update hours", () => {
+    expect(body.hours).to.equal(25);
+    expect(body.notes).to.include("additional feature");
+  });
+}

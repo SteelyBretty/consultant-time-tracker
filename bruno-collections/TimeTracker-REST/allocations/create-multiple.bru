@@ -1,0 +1,43 @@
+meta {
+  name: Create Another Allocation
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/allocations
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "project_id": "{{anotherProjectId}}",
+    "week_starting": "2024-12-16",
+    "hours": 15,
+    "notes": "Backend API development"
+  }
+}
+
+vars:pre-request {
+  anotherProjectId: // Set to a different project ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 201", () => {
+    expect(status).to.equal(201);
+  });
+  
+  test("Should create second allocation for same week", () => {
+    expect(body.week_starting).to.equal("2024-12-16");
+    expect(body.hours).to.equal(15);
+  });
+}
