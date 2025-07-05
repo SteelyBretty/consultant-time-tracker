@@ -1,0 +1,30 @@
+meta {
+  name: Register Duplicate User (Error Test)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "johndoe",
+    "email": "different@example.com",
+    "password": "password789",
+    "full_name": "Another John"
+  }
+}
+
+tests {
+  test("Status should be 409 (Conflict)", function() {
+    expect(res.status).to.equal(409);
+  });
+  
+  test("Should return error message", function() {
+    expect(res.body.error).to.exist;
+  });
+}
