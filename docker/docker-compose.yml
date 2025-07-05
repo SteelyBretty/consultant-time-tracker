@@ -9,6 +9,7 @@ services:
     volumes:
       - ..:/app
       - /app/tmp
+      - ../data:/app/data
     environment:
       - APP_ENV=development
       - APP_PORT=8080
