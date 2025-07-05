@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/SteelyBretty/consultant-time-tracker/internal/database"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -23,13 +24,33 @@ func main() {
 		host = "0.0.0.0"
 	}
 
+	if err := database.Initialize(); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+	defer database.Close()
+
+	if err := database.Migrate(); err != nil {
+		log.Fatal("Failed to run migrations:", err)
+	}
+
+	if err := database.CreateIndexes(); err != nil {
+		log.Fatal("Failed to create indexes:", err)
+	}
+
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context) {
+		sqlDB, err := database.DB.DB()
+		dbStatus := "healthy"
+		if err != nil || sqlDB.Ping() != nil {
+			dbStatus = "unhealthy"
+		}
+
 		c.JSON(200, gin.H{
-			"status":  "healthy",
-			"service": "consultant-time-tracker",
-			"version": "0.1.2",
+			"status":   "healthy",
+			"service":  "consultant-time-tracker",
+			"version":  "0.1.0",
+			"database": dbStatus,
 		})
 	})
 
