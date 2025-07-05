@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/SteelyBretty/consultant-time-tracker/internal/api"
 	"github.com/SteelyBretty/consultant-time-tracker/internal/database"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -64,6 +65,8 @@ func main() {
 			},
 		})
 	})
+
+	api.SetupRoutes(r)
 
 	log.Printf("Server starting on %s:%s", host, port)
 	if err := r.Run(host + ":" + port); err != nil {
