@@ -1,0 +1,38 @@
+meta {
+  name: List Time Entries
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/time-entries?limit=20&offset=0
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return time entry list", () => {
+    expect(body).to.have.all.keys('time_entries', 'total', 'offset', 'limit');
+    expect(body.time_entries).to.be.an('array');
+  });
+  
+  test("Entries should be ordered by date desc", () => {
+    if (body.time_entries.length > 1) {
+      const dates = body.time_entries.map(e => new Date(e.date));
+      const sorted = [...dates].sort((a, b) => b - a);
+      expect(dates).to.deep.equal(sorted);
+    }
+  });
+}

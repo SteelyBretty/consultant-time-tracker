@@ -1,0 +1,43 @@
+meta {
+  name: Get Week Summary
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/time-entries/week-summary?week={{weekDate}}
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  weekDate: "2024-12-16"
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return allocation vs actual comparison", () => {
+    expect(body).to.have.all.keys('week_starting', 'projects', 'total_allocated', 'total_actual');
+    expect(body.projects).to.be.an('array');
+  });
+  
+  test("Each project should show variance", () => {
+    body.projects.forEach(project => {
+      expect(project).to.have.all.keys(
+        'project_id', 'project', 'allocated_hours', 'actual_hours', 'variance'
+      );
+      expect(project.variance).to.equal(project.actual_hours - project.allocated_hours);
+    });
+  });
+}

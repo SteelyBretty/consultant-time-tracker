@@ -1,0 +1,39 @@
+meta {
+  name: Get Week Entries
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/time-entries/week?week={{weekDate}}
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  weekDate: "2024-12-16" // Any date in the week
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 200", () => {
+    expect(status).to.equal(200);
+  });
+  
+  test("Should return week data", () => {
+    expect(body).to.have.all.keys('week_starting', 'time_entries', 'daily_totals', 'week_total');
+    expect(body.daily_totals).to.be.an('object');
+  });
+  
+  test("Week total should match daily totals sum", () => {
+    const sum = Object.values(body.daily_totals).reduce((acc, hours) => acc + hours, 0);
+    expect(body.week_total).to.be.closeTo(sum, 0.01);
+  });
+}
