@@ -1,0 +1,33 @@
+meta {
+  name: Delete Project
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/projects/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: {{projectId}}
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+vars:pre-request {
+  projectId: // Set this to a valid project ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status } = res;
+  
+  test("Status should be 204", () => {
+    expect(status).to.equal(204);
+  });
+}

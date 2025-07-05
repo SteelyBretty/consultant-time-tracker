@@ -216,9 +216,9 @@ func (h *ClientHandler) mapClientToResponse(client *models.Client) *schemas.Clie
 	}
 
 	if len(client.Projects) > 0 {
-		response.Projects = make([]schemas.ProjectResponse, len(client.Projects))
+		response.Projects = make([]schemas.ClientProjectResponse, len(client.Projects))
 		for i, project := range client.Projects {
-			response.Projects[i] = schemas.ProjectResponse{
+			response.Projects[i] = schemas.ClientProjectResponse{
 				ID:           project.ID,
 				Name:         project.Name,
 				Code:         project.Code,

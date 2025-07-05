@@ -24,19 +24,19 @@ type UpdateClientRequest struct {
 }
 
 type ClientResponse struct {
-	ID        uuid.UUID         `json:"id"`
-	Name      string            `json:"name"`
-	Code      string            `json:"code"`
-	Email     string            `json:"email"`
-	Phone     string            `json:"phone"`
-	Address   string            `json:"address"`
-	IsActive  bool              `json:"is_active"`
-	CreatedAt time.Time         `json:"created_at"`
-	UpdatedAt time.Time         `json:"updated_at"`
-	Projects  []ProjectResponse `json:"projects,omitempty"`
+	ID        uuid.UUID               `json:"id"`
+	Name      string                  `json:"name"`
+	Code      string                  `json:"code"`
+	Email     string                  `json:"email"`
+	Phone     string                  `json:"phone"`
+	Address   string                  `json:"address"`
+	IsActive  bool                    `json:"is_active"`
+	CreatedAt time.Time               `json:"created_at"`
+	UpdatedAt time.Time               `json:"updated_at"`
+	Projects  []ClientProjectResponse `json:"projects,omitempty"`
 }
 
-type ProjectResponse struct {
+type ClientProjectResponse struct {
 	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	Code         string    `json:"code"`

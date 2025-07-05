@@ -1,0 +1,60 @@
+meta {
+  name: Create Project
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/projects
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "name": "Website Redesign",
+    "code": "WEB2024",
+    "description": "Complete redesign of corporate website with modern UI/UX",
+    "client_id": "{{clientId}}",
+    "billable_rate": 150.00,
+    "currency": "USD",
+    "start_date": "2024-01-15",
+    "end_date": "2024-06-30"
+  }
+}
+
+vars:pre-request {
+  clientId: // Set this to a valid client ID from previous tests
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 201", () => {
+    expect(status).to.equal(201);
+  });
+  
+  test("Should return project data", () => {
+    expect(body).to.have.property('id');
+    expect(body.name).to.equal("Website Redesign");
+    expect(body.code).to.equal("WEB2024");
+    expect(body.billable_rate).to.equal(150);
+  });
+  
+  test("Should include client info", () => {
+    expect(body.client).to.exist;
+    expect(body.client).to.have.property('id');
+    expect(body.client).to.have.property('name');
+  });
+  
+  test("Dates should be formatted correctly", () => {
+    expect(body.start_date).to.equal("2024-01-15");
+    expect(body.end_date).to.equal("2024-06-30");
+  });
+}

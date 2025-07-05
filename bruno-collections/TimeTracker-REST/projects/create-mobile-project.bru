@@ -1,0 +1,46 @@
+meta {
+  name: Create Mobile App Project
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/projects
+  body: json
+  auth: basic
+}
+
+auth:basic {
+  username: johndoe
+  password: password123
+}
+
+body:json {
+  {
+    "name": "Mobile App Development",
+    "code": "MOB2024",
+    "description": "iOS and Android app for customer portal",
+    "client_id": "{{clientId}}",
+    "billable_rate": 175.00,
+    "currency": "USD",
+    "start_date": "2024-02-01"
+  }
+}
+
+vars:pre-request {
+  clientId: // Set this to a valid client ID
+}
+
+tests {
+  const { expect } = require('chai');
+  const { status, body } = res;
+  
+  test("Status should be 201", () => {
+    expect(status).to.equal(201);
+  });
+  
+  test("Should create project without end date", () => {
+    expect(body.end_date).to.be.null;
+    expect(body.status).to.equal("active");
+  });
+}
