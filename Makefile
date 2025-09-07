@@ -9,6 +9,9 @@ build:
 test:
 	go test -v ./...
 
+lint:
+	golangci-lint run
+
 clean:
 	rm -rf bin/
 	rm -f data/*.db

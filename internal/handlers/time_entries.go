@@ -41,7 +41,11 @@ func (h *TimeEntryHandler) CreateTimeEntry(c *gin.Context) {
 		return
 	}
 
-	date, _ := time.Parse("2006-01-02", req.Date)
+	date, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format, use YYYY-MM-DD"})
+		return
+	}
 
 	timeEntry, err := h.timeEntryService.CreateTimeEntry(
 		userID, req.ProjectID, date, req.Hours, req.Description, req.IsBillable,
@@ -112,11 +116,17 @@ func (h *TimeEntryHandler) ListTimeEntries(c *gin.Context) {
 	if startStr := c.Query("start_date"); startStr != "" {
 		if date, err := time.Parse("2006-01-02", startStr); err == nil {
 			startDate = &date
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date format, use YYYY-MM-DD"})
+			return
 		}
 	}
 	if endStr := c.Query("end_date"); endStr != "" {
 		if date, err := time.Parse("2006-01-02", endStr); err == nil {
 			endDate = &date
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end_date format, use YYYY-MM-DD"})
+			return
 		}
 	}
 

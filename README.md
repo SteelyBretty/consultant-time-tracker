@@ -19,7 +19,7 @@ A comprehensive time tracking and billing system for consultants with REST and G
 - **Web Framework**: Gin
 - **Database**: SQLite with GORM
 - **Authentication**: Basic Auth with bcrypt
-- **API Testing**: Bruno
+- **API Testing**: TBD
 - **Containerization**: Docker & Docker Compose
 
 ## Getting Started for Developers
@@ -135,55 +135,6 @@ Include the Authorization header: `Basic base64(username:password)`
 - `PUT /api/v1/projects/:id` - Update project
 - `DELETE /api/v1/projects/:id` - Delete project
 
-## Testing with Bruno
-
-### Setup Bruno Collection
-
-1. Download and install Bruno from https://www.usebruno.com/
-
-2. Open the collection:
-   - Launch Bruno
-   - Click "Open Collection"
-   - Navigate to `consultant-time-tracker/bruno-collections/TimeTracker-REST`
-   - Click "Open"
-
-3. Select environment:
-   - In the top-right dropdown, select "Local"
-   - This sets the base URL to `http://localhost:8080`
-
-### Running Tests
-
-1. Ensure the server is running:
-   ```bash
-   make docker-dev
-   ```
-
-2. Follow this test flow:
-   - **Register** a new user (or use existing)
-   - **Login** to verify credentials
-   - **Create Client** to add test data
-   - **List Clients** to see all clients
-   - **Update/Delete** as needed
-
-3. Each request includes automated tests that verify the response
-
-### API Testing Workflow
-
-#### 1. First Time Setup
-```
-1. Register User → 2. Login (verify) → 3. Create Clients
-```
-
-#### 2. Client Management Flow
-```
-1. Create Client → 2. List Clients → 3. Get Client → 4. Update Client → 5. Delete Client
-```
-
-### Test Data
-
-The Bruno collection includes sample data for:
-- **Users**: johndoe/password123, janedoe/password456
-- **Clients**: Acme Corporation (ACME), TechCorp Solutions (TECH)
 
 ## API Documentation
 
@@ -337,11 +288,6 @@ consultant-time-tracker/
 │       ├── auth_service.go    # Auth logic
 │       └── client_service.go  # Client logic
 ├── docker/            # Docker configurations
-├── bruno-collections/ # API test collections
-│   └── TimeTracker-REST/
-│       ├── auth/     # Auth test requests
-│       ├── clients/  # Client test requests
-│       └── system/   # Health checks
 ├── data/             # SQLite database file
 └── README.md         # This file
 ```
@@ -409,14 +355,20 @@ lsof -i :8080
 APP_PORT=8081
 ```
 
-## Next Steps
+## Production Checklist
 
-- **Milestone 6**: Project Management
-- **Milestone 7**: Time Allocations
-- **Milestone 8**: Time Entry Tracking
-- **Milestone 9**: GraphQL API
-- **Milestone 10**: Reporting & Analytics
+- Use TLS (terminate TLS at a load balancer or reverse proxy).
+- Replace Basic Auth with JWT/OAuth for production authentication.
+- Ensure environment variables are set (APP_PORT, APP_HOST, DB_PATH).
+- Use a managed database or migrate from SQLite to Postgres for multi-instance deployments.
+- Configure secrets with a secret manager (do not store .env in repo in production).
+- Add monitoring (Prometheus) and structured logs (e.g. zap or zerolog).
 
-## License
+## CI / Linting
 
-[Your License Here]
+Add a GitHub Actions workflow (included) that runs:
+- go test ./...
+- go vet ./...
+- golangci-lint run
+
+Example workflow file: `.github/workflows/go-ci.yml` is included in this repo.

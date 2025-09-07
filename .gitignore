@@ -45,3 +45,7 @@ bruno-collections/**/.env
 
 # Docker
 docker-compose.override.ymltmp/
+
+
+# WIP tracker
+todo.txt
