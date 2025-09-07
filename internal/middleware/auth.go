@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/base64"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 
 func BasicAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		auth := c.GetHeader("Authorization")
+		auth := strings.TrimSpace(c.GetHeader("Authorization"))
 		if auth == "" {
 			c.Header("WWW-Authenticate", `Basic realm="Restricted"`)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -28,7 +29,7 @@ func BasicAuth() gin.HandlerFunc {
 			return
 		}
 
-		payload, err := base64.StdEncoding.DecodeString(auth[6:])
+		payload, err := base64.StdEncoding.DecodeString(strings.TrimSpace(auth[6:]))
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid authorization encoding",
@@ -57,22 +58,29 @@ func BasicAuth() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user_id", user.ID.String())
+		// store UUID directly
+		c.Set("user_id", user.ID)
 		c.Set("user", user)
 		c.Next()
 	}
 }
 
 func GetUserID(c *gin.Context) (uuid.UUID, error) {
-	userIDStr, exists := c.Get("user_id")
+	userIDVal, exists := c.Get("user_id")
 	if !exists {
-		return uuid.Nil, nil
+		return uuid.Nil, errors.New("user not present in context")
 	}
 
-	userID, err := uuid.Parse(userIDStr.(string))
-	if err != nil {
-		return uuid.Nil, err
+	switch v := userIDVal.(type) {
+	case uuid.UUID:
+		return v, nil
+	case string:
+		u, err := uuid.Parse(v)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		return u, nil
+	default:
+		return uuid.Nil, errors.New("invalid user_id type in context")
 	}
-
-	return userID, nil
 }

@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/SteelyBretty/consultant-time-tracker/internal/api"
 	"github.com/SteelyBretty/consultant-time-tracker/internal/database"
@@ -68,8 +73,30 @@ func main() {
 
 	api.SetupRoutes(r)
 
-	log.Printf("Server starting on %s:%s", host, port)
-	if err := r.Run(host + ":" + port); err != nil {
-		log.Fatal("Failed to start server:", err)
+	srv := &http.Server{
+		Addr:    host + ":" + port,
+		Handler: r,
 	}
+
+	// start server
+	go func() {
+		log.Printf("Server starting on %s:%s", host, port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }

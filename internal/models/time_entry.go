@@ -9,9 +9,9 @@ import (
 
 type TimeEntry struct {
 	BaseModel
-	ProjectID   uuid.UUID      `gorm:"not null" json:"project_id"`
-	UserID      uuid.UUID      `gorm:"not null" json:"user_id"`
-	Date        datatypes.Date `gorm:"not null" json:"date"`
+	ProjectID   uuid.UUID      `gorm:"not null;uniqueIndex:idx_timeentry_project_user_date,priority:1" json:"project_id"`
+	UserID      uuid.UUID      `gorm:"not null;uniqueIndex:idx_timeentry_project_user_date,priority:2" json:"user_id"`
+	Date        datatypes.Date `gorm:"not null;uniqueIndex:idx_timeentry_project_user_date,priority:3" json:"date"`
 	Hours       float64        `gorm:"not null" json:"hours"`
 	Description string         `json:"description"`
 	IsBillable  bool           `gorm:"default:true" json:"is_billable"`

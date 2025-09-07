@@ -40,10 +40,18 @@ func (h *ProjectHandler) CreateProject(c *gin.Context) {
 		return
 	}
 
-	startDate, _ := time.Parse("2006-01-02", req.StartDate)
+	startDate, err := time.Parse("2006-01-02", req.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start_date format, use YYYY-MM-DD"})
+		return
+	}
 	var endDate *time.Time
 	if req.EndDate != nil {
-		parsedEndDate, _ := time.Parse("2006-01-02", *req.EndDate)
+		parsedEndDate, err := time.Parse("2006-01-02", *req.EndDate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end_date format, use YYYY-MM-DD"})
+			return
+		}
 		endDate = &parsedEndDate
 	}
 

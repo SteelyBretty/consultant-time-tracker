@@ -39,7 +39,11 @@ func (h *AllocationHandler) CreateAllocation(c *gin.Context) {
 		return
 	}
 
-	weekStarting, _ := time.Parse("2006-01-02", req.WeekStarting)
+	weekStarting, err := time.Parse("2006-01-02", req.WeekStarting)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid week_starting format, use YYYY-MM-DD"})
+		return
+	}
 
 	allocation, err := h.allocationService.CreateAllocation(
 		userID, req.ProjectID, weekStarting, req.Hours, req.Notes,
@@ -258,8 +262,16 @@ func (h *AllocationHandler) CopyWeekAllocations(c *gin.Context) {
 		return
 	}
 
-	fromWeek, _ := time.Parse("2006-01-02", req.FromWeek)
-	toWeek, _ := time.Parse("2006-01-02", req.ToWeek)
+	fromWeek, err := time.Parse("2006-01-02", req.FromWeek)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid from_week format, use YYYY-MM-DD"})
+		return
+	}
+	toWeek, err := time.Parse("2006-01-02", req.ToWeek)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid to_week format, use YYYY-MM-DD"})
+		return
+	}
 
 	allocations, err := h.allocationService.CopyWeekAllocations(userID, fromWeek, toWeek)
 	if err != nil {

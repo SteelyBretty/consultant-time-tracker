@@ -17,7 +17,7 @@ const (
 type Project struct {
 	BaseModel
 	Name         string          `gorm:"not null" json:"name"`
-	Code         string          `gorm:"uniqueIndex;not null" json:"code"`
+	Code         string          `gorm:"uniqueIndex:idx_project_user_code,priority:1;not null" json:"code"`
 	Description  string          `json:"description"`
 	Status       ProjectStatus   `gorm:"default:'active'" json:"status"`
 	BillableRate float64         `gorm:"not null" json:"billable_rate"`
@@ -26,7 +26,7 @@ type Project struct {
 	EndDate      *datatypes.Date `json:"end_date"`
 	IsActive     bool            `gorm:"default:true" json:"is_active"`
 	ClientID     uuid.UUID       `gorm:"not null" json:"client_id"`
-	UserID       uuid.UUID       `gorm:"not null" json:"user_id"`
+	UserID       uuid.UUID       `gorm:"not null;uniqueIndex:idx_project_user_code,priority:2" json:"user_id"`
 	Client       Client          `gorm:"foreignKey:ClientID" json:"client,omitempty"`
 	User         User            `gorm:"foreignKey:UserID" json:"-"`
 	Allocations  []Allocation    `gorm:"foreignKey:ProjectID" json:"allocations,omitempty"`
